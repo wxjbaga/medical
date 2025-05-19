@@ -1,0 +1,7 @@
+测试用的小型数据集
+心脏数据集：Task02_Heart_2D_Test.zip
+肺部数据集：Task06_Lung_2D_Test.zip
+
+完整数据集
+心脏数据集：Task02_Heart_2D.zip（训练集：1,831条数据；验证集：440条数据）
+肺部数据集：Task06_Lung_2D.zip（训练集：1,358条数据；验证集：299条数据)

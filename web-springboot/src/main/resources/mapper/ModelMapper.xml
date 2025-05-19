@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gjq.mapper.ModelMapper">
+    
+    <!-- 模型视图对象结果映射 -->
+    <resultMap id="modelVOMap" type="com.gjq.vo.model.ModelVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="dataset_id" property="datasetId"/>
+        <result column="dataset_name" property="datasetName"/>
+        <result column="dataset_bucket" property="datasetBucket"/>
+        <result column="dataset_object_key" property="datasetObjectKey"/>
+        <result column="model_bucket" property="modelBucket"/>
+        <result column="model_object_key" property="modelObjectKey"/>
+        <result column="status" property="status"/>
+        <result column="error_msg" property="errorMsg"/>
+        <result column="train_hyperparams" property="trainHyperparams"/>
+        <result column="train_metrics" property="trainMetrics"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="create_username" property="createUsername"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        m.id, m.name, m.description, m.dataset_id, m.dataset_bucket, m.dataset_object_key,
+        m.model_bucket, m.model_object_key, m.status, m.error_msg, m.train_hyperparams,
+        m.train_metrics, m.create_user_id, m.create_time, m.update_time
+    </sql>
+    
+    <!-- 带数据集和用户信息的列 -->
+    <sql id="VO_Column_List">
+        m.id, m.name, m.description, m.dataset_id, m.dataset_bucket, m.dataset_object_key,
+        m.model_bucket, m.model_object_key, m.status, m.error_msg, m.train_hyperparams,
+        m.train_metrics, m.create_user_id, m.create_time, m.update_time,
+        d.name as dataset_name, u.username as create_username
+    </sql>
+    
+    <!-- 分页查询模型 -->
+    <select id="selectModelPage" resultMap="modelVOMap">
+        SELECT
+        <include refid="VO_Column_List"/>
+        FROM model m
+        LEFT JOIN dataset d ON m.dataset_id = d.id
+        LEFT JOIN user u ON m.create_user_id = u.id
+        <where>
+            <if test="name != null and name != ''">
+                AND m.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="status != null">
+                AND m.status = #{status}
+            </if>
+            <if test="datasetId != null">
+                AND m.dataset_id = #{datasetId}
+            </if>
+        </where>
+        ORDER BY m.update_time DESC
+    </select>
+    
+    <!-- 获取模型详情 -->
+    <select id="selectModelDetail" resultMap="modelVOMap">
+        SELECT
+        <include refid="VO_Column_List"/>
+        FROM model m
+        LEFT JOIN dataset d ON m.dataset_id = d.id
+        LEFT JOIN user u ON m.create_user_id = u.id
+        WHERE m.id = #{id}
+    </select>
+    
+    <!-- 获取用户的所有模型 -->
+    <select id="selectAllModels" resultMap="modelVOMap">
+        SELECT
+        <include refid="VO_Column_List"/>
+        FROM model m
+        LEFT JOIN dataset d ON m.dataset_id = d.id
+        LEFT JOIN user u ON m.create_user_id = u.id
+        <where>
+            <if test="!isAdmin">
+                AND m.create_user_id = #{userId}
+            </if>
+        </where>
+        ORDER BY m.update_time DESC
+    </select>
+</mapper> 
